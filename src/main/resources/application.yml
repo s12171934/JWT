@@ -1,1 +1,28 @@
-spring.application.name=ToyBoard
+spring:
+  application:
+    name: ToyBoard
+
+  config:
+    import: classpath:/properties/env.yml
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # env.yml을 통한 개인정보 가림
+    url: ${db-info.url}
+    username: ${db-info.username}
+    password: ${db-info.password}
+
+  jpa:
+    hibernate:
+      # JPA 자동 테이블 변경을 위한 설정
+      # none : 고정
+      # update : 갱신
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+#Spring의 기본 timeout 시간은 30m 이를 더 길게 유지하기 위한 설정
+server:
+  servlet:
+    session:
+      timeout: 90m
