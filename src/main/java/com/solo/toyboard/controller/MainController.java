@@ -1,5 +1,6 @@
 package com.solo.toyboard.controller;
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +27,7 @@ public class MainController {
 
         model.addAttribute("username", username);
         model.addAttribute("role", role);
+        model.addAttribute("isLogin", !(authentication instanceof AnonymousAuthenticationToken));
 
         return "main";
     }

@@ -10,6 +10,7 @@
     <form action="/loginProc" method="post">
         <input name="username" type="text" />
         <input name="password" type="password" />
+        <input name="_csrf" type="hidden" value="{{_csrf.token}}" />
         <input type="submit" value="login" />
     </form>
     <a href="/join">Join</a>

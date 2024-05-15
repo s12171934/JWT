@@ -10,6 +10,7 @@
     <form action="/joinProc" method="post" name="joinForm">
         <input type="text" name="username" placeholder="Username"/>
         <input type="password" name="password" placeholder="Password"/>
+        <input name="_csrf" type="hidden" value="{{_csrf.token}}" />
         <input type="submit" value="Join"/>
     </form>
 </body>

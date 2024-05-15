@@ -38,14 +38,24 @@ public class SecurityConfig {
                         .loginProcessingUrl("/loginProc").permitAll()
                 );
 
-        http
-                .csrf((auth) -> auth.disable());
-
         //동시 로그인 허용
         http
                 .sessionManagement((auth) -> auth
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(true)
+                );
+
+        //세션 고정 공격 보호
+        http
+                .sessionManagement((auth) -> auth
+                        .sessionFixation().changeSessionId()
+                );
+
+        //로그아웃
+        http
+                .logout((auth) -> auth
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
                 );
 
         return http.build();

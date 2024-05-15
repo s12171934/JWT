@@ -10,5 +10,12 @@
     {{username}}
     <br />
     {{role}}
+    <br />
+    {{#isLogin}}
+        <a href="/logout">logout</a>
+    {{/isLogin}}
+    {{^isLogin}}
+        <a href="/login">login</a>
+    {{/isLogin}}
 </body>
 </html>
