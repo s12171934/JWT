@@ -3,6 +3,8 @@ package com.solo.toyboard.config;
 import org.hibernate.annotations.Filter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,13 +22,24 @@ public class SecurityConfig {
 
     }
 
+    //권한 사이의 상하관계 설정
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+
+        RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
+        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_MANAGER > ROLE_USER");
+        return hierarchy;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         //uri별 접근권한 설정
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/join", "/joinProc").permitAll()
+                        .requestMatchers( "/join", "/joinProc").permitAll()
+                        .requestMatchers("/").hasAnyRole("USER")
+                        .requestMatchers("/manager").hasAnyRole("MANAGER")
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 );
