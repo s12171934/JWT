@@ -1,8 +1,8 @@
 package com.solo.toyboard.jwt;
 
-import com.solo.toyboard.config.SecurityConfig;
 import com.solo.toyboard.dto.CustomUserDetails;
 import com.solo.toyboard.entity.UserEntity;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public class JWTFilter extends OncePerRequestFilter {
 
@@ -26,40 +27,51 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String authorization = request.getHeader("Authorization");
+        // 헤더에서 access키에 담긴 토큰을 꺼냄
+        String accessToken = request.getHeader("access");
 
-        //Authorization 검증
-        if(authorization == null || !authorization.startsWith("Bearer ")) {
-            System.out.println("Error token");
-            //다음 Filter이동
-            filterChain.doFilter(request, response);
-
-            return;
-        }
-
-        String token = authorization.split(" ")[1];
-
-        if(jwtUtil.isExpired(token)) {
-            System.out.println("Expire token");
+        // 토큰이 없다면 다음 필터로 넘김
+        if (accessToken == null) {
 
             filterChain.doFilter(request, response);
 
             return;
         }
 
-        String username = jwtUtil.getUsername(token);
-        String role = jwtUtil.getRole(token);
-        String password = "temp";
+        // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음
+        try {
+            jwtUtil.isExpired(accessToken);
+        } catch (ExpiredJwtException e) {
+
+            PrintWriter writer = response.getWriter();
+            writer.print("access token expired");
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        // 토큰이 access인지 확인 (발급시 페이로드에 명시)
+        String category = jwtUtil.getCategory(accessToken);
+
+        if (!category.equals("access")) {
+
+            PrintWriter writer = response.getWriter();
+            writer.print("invalid access token");
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        // username, role 값을 획득
+        String username = jwtUtil.getUsername(accessToken);
+        String role = jwtUtil.getRole(accessToken);
 
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(username);
-        userEntity.setPassword(password);
         userEntity.setRole(role);
+        CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
 
-        CustomUserDetails userDetails = new CustomUserDetails(userEntity);
-
-        //spring security 인증 토큰 생성 후 세션에 일시적 사용자 등록
-        Authentication authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);

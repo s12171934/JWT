@@ -1,8 +1,10 @@
 package com.solo.toyboard.config;
 
+import com.solo.toyboard.jwt.CustomLogoutFilter;
 import com.solo.toyboard.jwt.JWTFilter;
 import com.solo.toyboard.jwt.JWTUtil;
 import com.solo.toyboard.jwt.LoginFilter;
+import com.solo.toyboard.repository.RefreshRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Collections;
@@ -30,11 +33,13 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+    private final RefreshRepository refreshRepository;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil){
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, RefreshRepository refreshRepository){
 
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
+        this.refreshRepository = refreshRepository;
     }
 
     //authenticationManager Bean 등록
@@ -77,7 +82,7 @@ public class SecurityConfig {
         //uri별 접근권한 설정
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers( "/join", "/joinProc").permitAll()
+                        .requestMatchers( "/join", "/reissue").permitAll()
                         .requestMatchers("/").hasAnyRole("USER")
                         .requestMatchers("/manager").hasAnyRole("MANAGER")
                         .requestMatchers("/admin").hasRole("ADMIN")
@@ -89,8 +94,11 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository), UsernamePasswordAuthenticationFilter.class);
 
+        //로그아웃 커스텀 필터
+        http
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class);
 
 
         //JWT방식으로 로그인 하기 위한 다른 로그인 과정 disable
@@ -113,13 +121,6 @@ public class SecurityConfig {
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
-
-        //로그아웃
-        http
-                .logout((auth) -> auth
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/")
                 );
 
         return http.build();

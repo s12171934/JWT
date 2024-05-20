@@ -1,16 +1,19 @@
 package com.solo.toyboard.jwt;
 
-import com.solo.toyboard.dto.CustomUserDetails;
+import com.solo.toyboard.entity.RefreshEntity;
+import com.solo.toyboard.repository.RefreshRepository;
+import com.solo.toyboard.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
@@ -22,10 +25,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+    private final RefreshRepository refreshRepository;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshRepository refreshRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.refreshRepository = refreshRepository;
     }
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -45,18 +50,20 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
-        CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
-
-        String username = userDetails.getUsername();
-
+        String username = authResult.getName();
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         Iterator<? extends  GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority authority = iterator.next();
         String role = authority.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role, 60 * 60 * 180L);
+        String access = jwtUtil.createJwt("access", username, role, 10 * 60 * 1000L);
+        String refresh = jwtUtil.createJwt("refresh", username, role, 24 * 60 * 60 * 1000L);
 
-        response.addHeader("Authorization", "Bearer " + token);
+        new RefreshService(jwtUtil, refreshRepository).addRefreshEntity(username, refresh);
+
+        response.addHeader("access", access);
+        response.addCookie(new CookieUtil().createCookie("refresh", refresh));
+        response.setStatus(HttpStatus.OK.value());
     }
 
     //로그인 실패시 실행
