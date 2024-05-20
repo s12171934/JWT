@@ -21,9 +21,11 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
-  mustache:
-    servlet:
-      expose-request-attributes: true
+jwt:
+  secret: ${jwt.secret}
+
+front-end:
+  url: ${front-end.url}
 
 #Spring의 기본 timeout 시간은 30m 이를 더 길게 유지하기 위한 설정
 server:
