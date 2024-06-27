@@ -1,5 +1,6 @@
-package com.solo.toyboard.jwt;
+package com.solo.toyboard.controller;
 
+import com.solo.toyboard.service.RefreshService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ public class RefreshController {
         this.refreshService = refreshService;
     }
 
+    //refresh token을 통해서 access token을 재발급
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 

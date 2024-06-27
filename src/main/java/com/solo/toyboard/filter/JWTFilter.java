@@ -1,7 +1,8 @@
-package com.solo.toyboard.jwt;
+package com.solo.toyboard.filter;
 
 import com.solo.toyboard.dto.CustomUserDetails;
 import com.solo.toyboard.entity.UserEntity;
+import com.solo.toyboard.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

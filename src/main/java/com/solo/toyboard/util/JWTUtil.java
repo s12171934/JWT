@@ -1,4 +1,4 @@
-package com.solo.toyboard.jwt;
+package com.solo.toyboard.util;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;

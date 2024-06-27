@@ -1,11 +1,11 @@
-package com.solo.toyboard.jwt;
+package com.solo.toyboard.filter;
 
-import com.solo.toyboard.entity.RefreshEntity;
+import com.solo.toyboard.service.RefreshService;
 import com.solo.toyboard.repository.RefreshRepository;
 import com.solo.toyboard.util.CookieUtil;
+import com.solo.toyboard.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;

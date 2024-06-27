@@ -1,16 +1,14 @@
 package com.solo.toyboard.config;
 
-import com.solo.toyboard.jwt.CustomLogoutFilter;
-import com.solo.toyboard.jwt.JWTFilter;
-import com.solo.toyboard.jwt.JWTUtil;
-import com.solo.toyboard.jwt.LoginFilter;
+import com.solo.toyboard.filter.CustomLogoutFilter;
+import com.solo.toyboard.filter.JWTFilter;
+import com.solo.toyboard.util.JWTUtil;
+import com.solo.toyboard.filter.LoginFilter;
 import com.solo.toyboard.repository.RefreshRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -57,15 +55,6 @@ public class SecurityConfig {
 
     }
 
-    //권한 사이의 상하관계 설정
-    @Bean
-    public RoleHierarchy roleHierarchy() {
-
-        RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
-        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_MANAGER > ROLE_USER");
-        return hierarchy;
-    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -82,10 +71,6 @@ public class SecurityConfig {
         //uri별 접근권한 설정
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers( "/join", "/reissue").permitAll()
-                        .requestMatchers("/").hasAnyRole("USER")
-                        .requestMatchers("/manager").hasAnyRole("MANAGER")
-                        .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 );
 

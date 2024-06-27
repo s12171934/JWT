@@ -1,6 +1,7 @@
-package com.solo.toyboard.jwt;
+package com.solo.toyboard.filter;
 
 import com.solo.toyboard.repository.RefreshRepository;
+import com.solo.toyboard.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

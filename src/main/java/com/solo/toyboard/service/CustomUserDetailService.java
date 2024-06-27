@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+//LoginFilter을 사용하기 위해 CustomUserDetails를 불러오는 기능
 @Service
 public class CustomUserDetailService implements UserDetailsService {
     private final UserRepository userRepository;

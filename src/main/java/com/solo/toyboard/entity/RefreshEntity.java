@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
+//redis에 refresh token 저장
 @Data
 @RedisHash(value = "refresh", timeToLive = 24 * 60 * 60)
 public class RefreshEntity {

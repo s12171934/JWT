@@ -14,6 +14,7 @@ public class CustomUserDetails implements UserDetails {
         this.userEntity = userEntity;
     }
 
+    //role값 가져옴
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
@@ -28,11 +29,13 @@ public class CustomUserDetails implements UserDetails {
         return collection;
     }
 
+    //password 가져옴
     @Override
     public String getPassword() {
         return userEntity.getPassword();
     }
 
+    //username 가져옴
     @Override
     public String getUsername() {
         return userEntity.getUsername();
